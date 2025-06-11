@@ -135,10 +135,13 @@ public class App {
 
                 int attempts = 0;
                 while ("Идет загрузка".equals(t1) && "Это может занять некоторое время".equals(t2)) {
-                    if (attempts++ > 120) {
-                        break;
-                    }
-                    if (driver instanceof HtmlUnitDriver) {
+                    if (attempts++ >= 12) { // ~1 minute passed
+                        driver.get("https://dispute.kzn.ru/disputes/" + id);
+                        attempts = 0;
+                        if (driver instanceof HtmlUnitDriver) {
+                            ((HtmlUnitDriver) driver).getWebClient().waitForBackgroundJavaScript(5000);
+                        }
+                    } else if (driver instanceof HtmlUnitDriver) {
                         ((HtmlUnitDriver) driver).getWebClient().waitForBackgroundJavaScript(5000);
                     } else {
                         try {
