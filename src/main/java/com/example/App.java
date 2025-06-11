@@ -68,7 +68,8 @@ public class App {
             }
             driver = new ChromeDriver(options);
         } else {
-            HtmlUnitDriver hud = new HtmlUnitDriver(false);
+            HtmlUnitDriver hud = new HtmlUnitDriver(true);
+            hud.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
             if (proxy != null) {
                 hud.setProxySettings(proxy);
             }
@@ -83,6 +84,9 @@ public class App {
             }
             for (int id = 1; id <= maxId; id++) {
                 driver.get("https://dispute.kzn.ru/disputes/" + id);
+                if (driver instanceof HtmlUnitDriver) {
+                    ((HtmlUnitDriver) driver).getWebClient().waitForBackgroundJavaScript(5000);
+                }
                 WebElement body = driver.findElement(By.tagName("body"));
                 String text = body.getText();
                 Files.writeString(Path.of("dispute-" + id + ".txt"), text, StandardCharsets.UTF_8);

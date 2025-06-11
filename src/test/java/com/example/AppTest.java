@@ -12,7 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AppTest {
     @Test
     void pageTitleShouldBePresent() {
-        HtmlUnitDriver driver = new HtmlUnitDriver(false);
+        HtmlUnitDriver driver = new HtmlUnitDriver(true);
+        driver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
         String proxyUrl = System.getenv("HTTP_PROXY");
         if (proxyUrl == null || proxyUrl.isEmpty()) {
             proxyUrl = System.getenv("http_proxy");
@@ -33,6 +34,7 @@ public class AppTest {
         }
         try {
             driver.get("https://dispute.kzn.ru/disputes/1");
+            driver.getWebClient().waitForBackgroundJavaScript(5000);
             assertEquals("ИС ОО", driver.getTitle());
         } finally {
             driver.quit();
