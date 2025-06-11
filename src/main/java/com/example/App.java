@@ -14,7 +14,8 @@ import java.nio.charset.StandardCharsets;
 
 public class App {
     public static void main(String[] args) throws IOException {
-        WebDriverManager.chromedriver().setup();
+        // Download a fresh ChromeDriver in case a mismatched version is cached
+        WebDriverManager.chromedriver().clearDriverCache().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
         options.addArguments("--disable-gpu");
