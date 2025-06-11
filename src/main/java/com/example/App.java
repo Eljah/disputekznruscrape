@@ -53,6 +53,22 @@ public class App {
         }
     }
 
+    private static List<String> extractLines(WebDriver driver, String[] ignore) {
+        WebElement body = driver.findElement(By.tagName("body"));
+        String text = body.getText();
+        String[] lines = text.split("\\r?\\n");
+        List<String> filtered = new ArrayList<>();
+        outer: for (String line : lines) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty()) continue;
+            for (String ig : ignore) {
+                if (trimmed.equals(ig)) continue outer;
+            }
+            filtered.add(trimmed);
+        }
+        return filtered;
+    }
+
     public static void main(String[] args) throws IOException {
         String browser = System.getProperty("browser", "htmlunit");
         Proxy proxy = detectProxy();
@@ -112,20 +128,27 @@ public class App {
                 if (driver instanceof HtmlUnitDriver) {
                     ((HtmlUnitDriver) driver).getWebClient().waitForBackgroundJavaScript(5000);
                 }
-                WebElement body = driver.findElement(By.tagName("body"));
-                String text = body.getText();
-                String[] lines = text.split("\\r?\\n");
-                List<String> filtered = new ArrayList<>();
-                outer: for (String line : lines) {
-                    String trimmed = line.trim();
-                    if (trimmed.isEmpty()) continue;
-                    for (String ig : ignore) {
-                        if (trimmed.equals(ig)) continue outer;
-                    }
-                    filtered.add(trimmed);
-                }
+
+                List<String> filtered = extractLines(driver, ignore);
                 String t1 = filtered.size() > 0 ? filtered.get(0) : "";
                 String t2 = filtered.size() > 1 ? filtered.get(1) : "";
+
+                int attempts = 0;
+                while ("Идет загрузка".equals(t1) && "Это может занять некоторое время".equals(t2)) {
+                    if (attempts++ > 120) {
+                        break;
+                    }
+                    if (driver instanceof HtmlUnitDriver) {
+                        ((HtmlUnitDriver) driver).getWebClient().waitForBackgroundJavaScript(5000);
+                    } else {
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException ignored) {}
+                    }
+                    filtered = extractLines(driver, ignore);
+                    t1 = filtered.size() > 0 ? filtered.get(0) : "";
+                    t2 = filtered.size() > 1 ? filtered.get(1) : "";
+                }
                 Matcher m = datePattern.matcher(t1 + " " + t2);
                 String date = m.find() ? m.group() : "";
                 out.write(id + ",\"" + t1.replace("\"", "\"\"") + "\",\"" +
