@@ -3,8 +3,9 @@ package com.example;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 import java.io.IOException;
@@ -14,13 +15,16 @@ import java.nio.charset.StandardCharsets;
 
 public class App {
     public static void main(String[] args) throws IOException {
-        // Download a fresh ChromeDriver in case a mismatched version is cached
-        WebDriverManager.chromedriver().clearDriverCache().setup();
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
-        options.addArguments("--disable-gpu");
-
-        WebDriver driver = new ChromeDriver(options);
+        String browser = System.getProperty("browser", "htmlunit");
+        WebDriver driver;
+        if ("firefox".equalsIgnoreCase(browser)) {
+            WebDriverManager.firefoxdriver().setup();
+            FirefoxOptions options = new FirefoxOptions();
+            options.addArguments("--headless");
+            driver = new FirefoxDriver(options);
+        } else {
+            driver = new HtmlUnitDriver(true);
+        }
         try {
             int maxId = 3;
             if (args.length > 0) {
