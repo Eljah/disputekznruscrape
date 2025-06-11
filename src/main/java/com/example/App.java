@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.io.BufferedWriter;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -80,8 +81,13 @@ public class App {
             }
             driver = hud;
         }
-        try (BufferedWriter out = Files.newBufferedWriter(Path.of("disputes.csv"), StandardCharsets.UTF_8)) {
-            out.write("id,text1,text2,date\n");
+        Path csvPath = Path.of("disputes.csv");
+        boolean exists = Files.exists(csvPath);
+        try (BufferedWriter out = Files.newBufferedWriter(csvPath, StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+            if (!exists) {
+                out.write("id,text1,text2,date\n");
+            }
             int maxId = 3;
             if (args.length > 0) {
                 try {
@@ -101,6 +107,7 @@ public class App {
                 "ИС Мнение включена в Единый реестр российских программ для электронных вычислительных машин и баз данных под реестровым номером 7575"
             };
             for (int id = 1; id <= maxId; id++) {
+                System.out.println("Processing page " + id);
                 driver.get("https://dispute.kzn.ru/disputes/" + id);
                 if (driver instanceof HtmlUnitDriver) {
                     ((HtmlUnitDriver) driver).getWebClient().waitForBackgroundJavaScript(5000);
@@ -123,6 +130,7 @@ public class App {
                 String date = m.find() ? m.group() : "";
                 out.write(id + ",\"" + t1.replace("\"", "\"\"") + "\",\"" +
                           t2.replace("\"", "\"\"") + "\"," + date + "\n");
+                out.flush();
             }
         } finally {
             driver.quit();
