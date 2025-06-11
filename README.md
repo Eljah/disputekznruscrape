@@ -1,10 +1,10 @@
 # disputekznruscrape
 
 Simple Maven project demonstrating how to scrape pages of the site
-`https://dispute.kzn.ru` using Selenium in headless mode.
-By default it relies on the lightweight `HtmlUnitDriver` so no real
-browser is required. You can optionally use headless Firefox by setting
-the system property `browser=firefox` when running the program.
+`https://dispute.kzn.ru` using Selenium. By default it relies on the
+lightweight `HtmlUnitDriver` so no real browser is required. You can
+optionally use Chrome or headless Firefox by setting the `browser`
+system property when running the program.
 
 ## Build
 
@@ -33,12 +33,32 @@ By default the program downloads the text of disputes with id from 1 to 3
 and saves them to `dispute-<id>.txt`. You can specify a different upper
 id as the first argument.
 
+Two helper scripts are available to run the scraper with different
+browsers:
+
+* `./run-htmlunit.sh` – uses the lightweight HtmlUnit driver (default).
+* `./run-chrome.sh` – launches Google Chrome in visible mode. If no
+  display is available the script runs the browser via `xvfb-run`.
+
+Example using HtmlUnit:
+
 ```
-java -cp target/disputescraper-1.0-SNAPSHOT.jar com.example.App 5
+./run-htmlunit.sh 5
 ```
 
-Use `-Dbrowser=firefox` to run the scraper with headless Firefox instead of
-HtmlUnit:
+Example using Chrome:
+
+```
+./run-chrome.sh 5
+```
+
+Both the application and the tests automatically use the `HTTP_PROXY`
+environment variable if it is present. In this environment network
+access is only possible through the proxy at `http://proxy:8080`, so
+ensure this variable is set when running the program or Maven tests.
+
+You can still run with headless Firefox by specifying the system
+property:
 
 ```
 java -Dbrowser=firefox -cp target/disputescraper-1.0-SNAPSHOT.jar com.example.App 5
