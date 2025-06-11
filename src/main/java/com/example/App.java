@@ -68,7 +68,7 @@ public class App {
             }
             driver = new ChromeDriver(options);
         } else {
-            HtmlUnitDriver hud = new HtmlUnitDriver(true);
+            HtmlUnitDriver hud = new HtmlUnitDriver(false);
             if (proxy != null) {
                 hud.setProxySettings(proxy);
             }
